@@ -1,0 +1,61 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Delete Product: {{ product.name }} - Electro{% endblock %}
+
+{% block content %}
+<!-- Single Page Header start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6 wow fadeInUp" data-wow-delay="0.1s">Delete Product</h1>
+    <ol class="breadcrumb justify-content-center mb-0 wow fadeInUp" data-wow-delay="0.3s">
+        <li class="breadcrumb-item"><a href="{% url 'shop:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'shop:shop' %}">Shop</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'shop:product_detail' product.id %}">{{ product.name }}</a></li>
+        <li class="breadcrumb-item active text-white">Delete</li>
+    </ol>
+</div>
+<!-- Single Page Header End -->
+
+<!-- Confirm Delete Start -->
+<div class="container-fluid py-5">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="bg-light rounded p-5 text-center shadow-sm border border-danger">
+                    <div class="mb-4">
+                        <h2 class="text-dark fw-bold mb-2">Are you sure?</h2>
+                        <p class="text-muted">You are about to permanently delete the following product. This action cannot be undone.</p>
+                    </div>
+
+                    <div class="card border-0 bg-white rounded p-4 mb-4 text-start shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary text-white">{{ product.category.name }}</span>
+                            {% if product.is_on_sale %}
+                                <span class="badge bg-danger">SALE</span>
+                            {% endif %}
+                        </div>
+                        <h4 class="text-dark fw-bold mb-2">{{ product.name }}</h4>
+                        <h5 class="text-primary fw-bold mb-2">${{ product.price }}</h5>
+                        {% if product.description %}
+                            <p class="text-muted small mb-0">{{ product.description|truncatewords:20 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="{% url 'shop:product_detail' product.id %}" class="btn btn-secondary rounded-pill px-4 py-2">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger rounded-pill px-4 py-2">
+                                Confirm Delete
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Confirm Delete End -->
+{% endblock %}

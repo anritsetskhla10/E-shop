@@ -1,45 +1,100 @@
 {% extends 'shop/base.html' %}
+{% load static %}
 
-{% block title %}{{ product.name }} | E-Store{% endblock %}
+{% block title %}{{ product.name }} - Electro{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <a href="{% url 'shop:home' %}" class="btn btn-outline-secondary btn-sm mb-3">&larr; უკან დაბრუნება</a>
+<!-- Single Page Header start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6 wow fadeInUp" data-wow-delay="0.1s">Product Detail</h1>
+    <ol class="breadcrumb justify-content-center mb-0 wow fadeInUp" data-wow-delay="0.3s">
+        <li class="breadcrumb-item"><a href="{% url 'shop:home' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'shop:shop' %}">Shop</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'shop:category_products' product.category.id %}">{{ product.category.name }}</a></li>
+        <li class="breadcrumb-item active text-white">{{ product.name }}</li>
+    </ol>
+</div>
+<!-- Single Page Header End -->
 
-        <div class="card shadow-sm border-0 p-4">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h2 class="card-title fw-bold mb-0">{{ product.name }}</h2>
+<!-- Single Product Start -->
+<div class="container-fluid py-5">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-lg-5">
+                <div class="border rounded p-4 text-center bg-white shadow-sm position-relative">
                     {% if product.is_on_sale %}
-                        <span class="badge bg-danger fs-6 px-3 py-2">SALE</span>
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">SALE</span>
+                        </div>
                     {% endif %}
+                    <img src="" class="img-fluid rounded" alt="{{ product.name }}">
                 </div>
+            </div>
 
-                <p class="text-muted mb-4">
-                    კატეგორია: 
-                    <a href="{% url 'shop:category_products' product.category.id %}" class="text-decoration-none fw-semibold">
-                        {{ product.category.name }}
-                    </a>
-                </p>
+            <div class="col-lg-7">
+                <div class="ps-lg-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-primary text-white me-2 px-3 py-2 rounded-pill">
+                            {{ product.category.name }}
+                        </span>
+                        {% if product.is_available %}
+                            <span class="badge bg-success text-white px-3 py-2 rounded-pill">
+                                In Stock
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary text-white px-3 py-2 rounded-pill">
+                                Out of Stock
+                            </span>
+                        {% endif %}
+                    </div>
 
-                <div class="fs-2 fw-bold text-success mb-4">{{ product.price }} ₾</div>
+                    <h2 class="display-6 fw-bold text-dark mb-3">{{ product.name }}</h2>
 
-                <div class="border-top pt-3 mb-4">
-                    <h5 class="fw-semibold mb-2">პროდუქტის აღწერა:</h5>
-                    <p class="text-secondary lh-lg mb-0">{{ product.description }}</p>
-                </div>
+                    <div class="mb-4">
+                        <span class="h2 fw-bold text-primary">${{ product.price }}</span>
+                        {% if product.is_on_sale %}
+                            <span class="text-muted text-decoration-line-through fs-5 ms-3">${{ product.price|add:150 }}</span>
+                        {% endif %}
+                    </div>
 
-                <div class="alert {% if product.is_available %}alert-success{% else %}alert-danger{% endif %} mb-0 py-2">
-                    <strong>სტატუსი:</strong> 
-                    {% if product.is_available %}
-                        ხელმისაწვდომია მარაგში
-                    {% else %}
-                        მარაგში არ არის
-                    {% endif %}
+                    <div class="border-top border-bottom py-3 mb-4">
+                        <h5 class="fw-bold text-dark mb-2">Description</h5>
+                        <p class="text-muted mb-0">
+                            {% if product.description %}
+                                {{ product.description|linebreaks }}
+                            {% else %}
+                                No description provided for this product.
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Customer Actions Start -->
+                    <div class="d-flex align-items-center mb-4">
+                        <a href="{% url 'shop:cart' %}" class="btn btn-primary rounded-pill px-4 py-2 me-3">
+                            Add To Cart
+                        </a>
+                    </div>
+                    <!-- Customer Actions End -->
+
+                    <!-- Admin Management CRUD Actions Start -->
+                    <div class="bg-light rounded p-4 border">
+                        <h6 class="fw-bold text-dark text-uppercase mb-3">
+                            Product Management
+                        </h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{% url 'shop:product_update' product.id %}" class="btn btn-secondary rounded-pill px-4 py-2">
+                                Edit Product
+                            </a>
+                            <a href="{% url 'shop:product_delete' product.id %}" class="btn btn-outline-danger rounded-pill px-4 py-2">
+                                Delete Product
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Admin Management CRUD Actions End -->
                 </div>
             </div>
         </div>
     </div>
 </div>
+<!-- Single Product End -->
 {% endblock %}
