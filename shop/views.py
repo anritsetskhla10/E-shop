@@ -1,127 +1,131 @@
-from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Count
-from .models import Category, Product
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.views.generic import CreateView, DetailView, ListView, TemplateView
 from .forms import ProductForm
+from .models import Category, Product
 
 
-def home_view(request):
-    products = Product.objects.filter(is_available=True).order_by('price')
-    categories = (
-        Category.objects
-        .annotate(num_products=Count('products'))
+# დამხმარე ფუნქცია
+def get_annotated_categories():
+    return (
+        Category.objects.annotate(num_products=Count('products'))
         .filter(num_products__gt=0)
     )
 
-    context = {
-        'products': products,
-        'categories': categories,
-    }
-    return render(request, 'shop/product_list.html', context)
+
+class HomeView(ListView):
+    model = Product
+    template_name = 'shop/product_list.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        return Product.objects.filter(is_available=True).order_by('price')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = get_annotated_categories()
+        return context
 
 
-def category_products_view(request, category_id):
-    category = get_object_or_404(Category, id=category_id)
-    products = category.products.filter(is_available=True).order_by('price')
-    categories = (
-        Category.objects
-        .annotate(num_products=Count('products'))
-        .filter(num_products__gt=0)
-    )
+class ShopView(ListView):
+    model = Product
+    template_name = 'shop/shop.html'
+    context_object_name = 'products'
 
-    context = {
-        'category': category,
-        'products': products,
-        'categories': categories,
-    }
-    return render(request, 'shop/category_products.html', context)
+    def get_queryset(self):
+        return Product.objects.filter(is_available=True).order_by('price')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = get_annotated_categories()
+        return context
 
 
-def product_detail_view(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    categories = (
-        Category.objects
-        .annotate(num_products=Count('products'))
-        .filter(num_products__gt=0)
-    )
-    return render(request, 'shop/product_detail.html', {
-        'product': product,
-        'categories': categories,
-    })
+class CategoryProductsView(ListView):
+    model = Product
+    template_name = 'shop/category_products.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        self.category = get_object_or_404(Category, id=self.kwargs['category_id'])
+        return self.category.products.filter(is_available=True).order_by('price')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = self.category
+        context['categories'] = get_annotated_categories()
+        return context
 
 
-def sale_products_view(request):
-    products = Product.objects.filter(is_available=True, is_on_sale=True).order_by('price')
-    categories = (
-        Category.objects
-        .annotate(num_products=Count('products'))
-        .filter(num_products__gt=0)
-    )
-    return render(request, 'shop/sale_products.html', {
-        'products': products,
-        'categories': categories,
-    })
+class SaleProductsView(ListView):
+    model = Product
+    template_name = 'shop/sale_products.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        return Product.objects.filter(is_available=True, is_on_sale=True).order_by('price')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = get_annotated_categories()
+        return context
 
 
-def shop_view(request):
-    products = Product.objects.filter(is_available=True).order_by('price')
-    categories = (
-        Category.objects
-        .annotate(num_products=Count('products'))
-        .filter(num_products__gt=0)
-    )
-    return render(request, 'shop/shop.html', {
-        'products': products,
-        'categories': categories,
-    })
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'shop/product_detail.html'
+    context_object_name = 'product'
+    pk_url_kwarg = 'product_id'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = get_annotated_categories()
+        return context
 
 
-def cart_view(request):
-    categories = (
-        Category.objects
-        .annotate(num_products=Count('products'))
-        .filter(num_products__gt=0)
-    )
-    return render(request, 'shop/cart.html', {'categories': categories})
+class CartView(TemplateView):
+    template_name = 'shop/cart.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = get_annotated_categories()
+        return context
 
 
-def checkout_view(request):
-    categories = (
-        Category.objects
-        .annotate(num_products=Count('products'))
-        .filter(num_products__gt=0)
-    )
-    return render(request, 'shop/cheackout.html', {'categories': categories})
+class CheckoutView(TemplateView):
+    template_name = 'shop/cheackout.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = get_annotated_categories()
+        return context
 
 
-def contact_view(request):
-    categories = (
-        Category.objects
-        .annotate(num_products=Count('products'))
-        .filter(num_products__gt=0)
-    )
-    return render(request, 'shop/contact.html', {'categories': categories})
+class ContactView(TemplateView):
+    template_name = 'shop/contact.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = get_annotated_categories()
+        return context
 
 
-def product_create_view(request):
-    if request.method == 'POST':
-        form = ProductForm(request.POST)
-        if form.is_valid():
-            product = form.save()
-            return redirect('shop:product_detail', product_id=product.id)
-    else:
-        form = ProductForm()
+class ProductCreateView(CreateView):
+    model = Product
+    form_class = ProductForm
+    template_name = 'shop/product_form.html'
 
-    categories = (
-        Category.objects
-        .annotate(num_products=Count('products'))
-        .filter(num_products__gt=0)
-    )
-    return render(request, 'shop/product_form.html', {
-        'form': form,
-        'title': 'Add New Product',
-        'button_text': 'Create Product',
-        'categories': categories,
-    })
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Add New Product'
+        context['button_text'] = 'Create Product'
+        context['categories'] = get_annotated_categories()
+        return context
+
+    def get_success_url(self):
+        return reverse('shop:product_detail', kwargs={'product_id': self.object.id})
+
 
 
 def product_update_view(request, product_id):
@@ -135,18 +139,14 @@ def product_update_view(request, product_id):
     else:
         form = ProductForm(instance=product)
 
-    categories = (
-        Category.objects
-        .annotate(num_products=Count('products'))
-        .filter(num_products__gt=0)
-    )
-    return render(request, 'shop/product_form.html', {
+    context = {
         'form': form,
         'product': product,
         'title': f'Edit Product: {product.name}',
         'button_text': 'Save Changes',
-        'categories': categories,
-    })
+        'categories': get_annotated_categories(),
+    }
+    return render(request, 'shop/product_form.html', context)
 
 
 def product_delete_view(request, product_id):
@@ -156,12 +156,8 @@ def product_delete_view(request, product_id):
         product.delete()
         return redirect('shop:home')
 
-    categories = (
-        Category.objects
-        .annotate(num_products=Count('products'))
-        .filter(num_products__gt=0)
-    )
-    return render(request, 'shop/product_confirm_delete.html', {
+    context = {
         'product': product,
-        'categories': categories,
-    })
+        'categories': get_annotated_categories(),
+    }
+    return render(request, 'shop/product_confirm_delete.html', context)
