@@ -10,6 +10,7 @@ class ProductForm(forms.ModelForm):
             'name',
             'description',
             'price',
+            'image',
             'is_on_sale',
             'is_available',
         ]
@@ -18,6 +19,7 @@ class ProductForm(forms.ModelForm):
             'name': 'Product Name',
             'description': 'Description',
             'price': 'Price',
+            'image': 'Product Image',
             'is_on_sale': 'On Sale',
             'is_available': 'Available in Stock',
         }
@@ -38,6 +40,9 @@ class ProductForm(forms.ModelForm):
                 'class': 'form-control',
                 'step': '0.01',
                 'placeholder': '0.00',
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
             }),
             'is_on_sale': forms.CheckboxInput(attrs={
                 'class': 'form-check-input',

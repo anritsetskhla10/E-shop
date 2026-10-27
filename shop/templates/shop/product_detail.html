@@ -27,7 +27,15 @@
                             <span class="badge bg-danger fs-6 px-3 py-2 rounded-pill">SALE</span>
                         </div>
                     {% endif %}
-                    <img src="" class="img-fluid rounded" alt="{{ product.name }}">
+
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}" style="max-height: 400px; object-fit: contain;">
+                    {% else %}
+                        <div class="py-5 text-muted">
+                            <i class="fa fa-image fa-4x mb-3 text-secondary"></i>
+                            <p class="mb-0">No image available</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -49,6 +57,10 @@
                     </div>
 
                     <h2 class="display-6 fw-bold text-dark mb-3">{{ product.name }}</h2>
+
+                    <p class="text-muted small mb-3">
+                        Added by: <span class="fw-bold text-dark">{{ product.user.username|default:"System Admin" }}</span>
+                    </p>
 
                     <div class="mb-4">
                         <span class="h2 fw-bold text-primary">${{ product.price }}</span>
@@ -77,19 +89,21 @@
                     <!-- Customer Actions End -->
 
                     <!-- Admin Management CRUD Actions Start -->
-                    <div class="bg-light rounded p-4 border">
-                        <h6 class="fw-bold text-dark text-uppercase mb-3">
-                            Product Management
-                        </h6>
-                        <div class="d-flex flex-wrap gap-2">
-                            <a href="{% url 'shop:product_update' product.id %}" class="btn btn-secondary rounded-pill px-4 py-2">
-                                Edit Product
-                            </a>
-                            <a href="{% url 'shop:product_delete' product.id %}" class="btn btn-outline-danger rounded-pill px-4 py-2">
-                                Delete Product
-                            </a>
+                    {% if request.user == product.user %}
+                        <div class="bg-light rounded p-4 border">
+                            <h6 class="fw-bold text-dark text-uppercase mb-3">
+                                Product Management
+                            </h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="{% url 'shop:product_update' product.id %}" class="btn btn-secondary rounded-pill px-4 py-2">
+                                    Edit Product
+                                </a>
+                                <a href="{% url 'shop:product_delete' product.id %}" class="btn btn-outline-danger rounded-pill px-4 py-2">
+                                    Delete Product
+                                </a>
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
                     <!-- Admin Management CRUD Actions End -->
                 </div>
             </div>

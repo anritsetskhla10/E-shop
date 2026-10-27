@@ -1,3 +1,6 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -111,10 +114,14 @@ class ContactView(TemplateView):
         return context
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(LoginRequiredMixin, CreateView):
     model = Product
     form_class = ProductForm
     template_name = 'shop/product_form.html'
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -127,12 +134,15 @@ class ProductCreateView(CreateView):
         return reverse('shop:product_detail', kwargs={'product_id': self.object.id})
 
 
-
+@login_required
 def product_update_view(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
+    if product.user != request.user:
+        raise PermissionDenied
+
     if request.method == 'POST':
-        form = ProductForm(request.POST, instance=product)
+        form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             form.save()
             return redirect('shop:product_detail', product_id=product.id)
@@ -149,8 +159,12 @@ def product_update_view(request, product_id):
     return render(request, 'shop/product_form.html', context)
 
 
+@login_required
 def product_delete_view(request, product_id):
     product = get_object_or_404(Product, id=product_id)
+
+    if product.user != request.user:
+        raise PermissionDenied
 
     if request.method == 'POST':
         product.delete()

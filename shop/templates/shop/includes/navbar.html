@@ -45,7 +45,26 @@
                         <a href="{% url 'shop:cart' %}" class="nav-item nav-link">Shop Cart</a>
                         <a href="{% url 'shop:checkout' %}" class="nav-item nav-link">Cheackout</a>
                         <a href="{% url 'shop:contact' %}" class="nav-item nav-link">Contact</a>
-                        <a href="{% url 'shop:product_create' %}" class="nav-item nav-link me-2">Add Product</a>
+                        
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'shop:product_create' %}" class="nav-item nav-link text-white fw-bold">
+                                + Add Product
+                            </a>
+                            <span class="nav-item nav-link text-white-50 small fw-bold">
+                                Hello, {{ user.username }}
+                            </span>
+                            <a href="{% url 'users:logout' %}" class="nav-item nav-link text-warning fw-bold">
+                                Logout
+                            </a>
+                        {% else %}
+                            <a href="{% url 'users:login' %}" class="nav-item nav-link text-white">
+                                Login
+                            </a>
+                            <a href="{% url 'users:register' %}" class="nav-item nav-link text-white">
+                                Register
+                            </a>
+                        {% endif %}
+
                         <div class="nav-item dropdown d-block d-lg-none mb-3">
                             <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">All Category</a>
                             <div class="dropdown-menu m-0">
