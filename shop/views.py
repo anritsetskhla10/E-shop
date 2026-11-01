@@ -21,6 +21,7 @@ class HomeView(ListView):
     model = Product
     template_name = 'shop/product_list.html'
     context_object_name = 'products'
+    paginate_by = 6
 
     def get_queryset(self):
         return Product.objects.filter(is_available=True).order_by('price')
@@ -35,7 +36,7 @@ class ShopView(ListView):
     model = Product
     template_name = 'shop/shop.html'
     context_object_name = 'products'
-
+    paginate_by = 6
     def get_queryset(self):
         return Product.objects.filter(is_available=True).order_by('price')
 
@@ -49,6 +50,7 @@ class CategoryProductsView(ListView):
     model = Product
     template_name = 'shop/category_products.html'
     context_object_name = 'products'
+    paginate_by = 6
 
     def get_queryset(self):
         self.category = get_object_or_404(Category, id=self.kwargs['category_id'])
@@ -65,6 +67,7 @@ class SaleProductsView(ListView):
     model = Product
     template_name = 'shop/sale_products.html'
     context_object_name = 'products'
+    paginate_by = 6
 
     def get_queryset(self):
         return Product.objects.filter(is_available=True, is_on_sale=True).order_by('price')

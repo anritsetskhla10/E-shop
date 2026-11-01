@@ -1,0 +1,58 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Site Under Maintenance - Electro{% endblock %}
+
+{% block content %}
+<!-- Single Page Header start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6 wow fadeInUp" data-wow-delay="0.1s">Maintenance Mode</h1>
+    <ol class="breadcrumb justify-content-center mb-0 wow fadeInUp" data-wow-delay="0.3s">
+        <li class="breadcrumb-item"><a href="{% url 'shop:home' %}">Home</a></li>
+        <li class="breadcrumb-item active text-white">Maintenance</li>
+    </ol>
+</div>
+<!-- Single Page Header End -->
+
+<!-- Maintenance Content Start -->
+<div class="container-fluid py-5">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9">
+                <div class="bg-light rounded p-5 shadow-sm text-center border">
+                    <div class="mb-4">
+                        <span class="badge bg-primary text-white fs-6 px-3 py-2 rounded-pill text-uppercase">
+                            System Update
+                        </span>
+                    </div>
+
+                    <div class="mb-4">
+                        <i class="fa fa-tools text-primary" style="font-size: 5rem;"></i>
+                    </div>
+
+                    <h2 class="display-6 fw-bold text-dark mb-3">Site is under maintenance</h2>
+
+                    <p class="text-muted fs-5 mb-4">
+                        We are currently performing scheduled maintenance. We apologize for any inconvenience and appreciate your patience. Please check back later.
+                    </p>
+
+                    <div class="alert alert-white border rounded-pill d-inline-flex align-items-center py-2 px-4 shadow-sm mb-4">
+                        <span class="spinner-grow spinner-grow-sm text-primary me-2" role="status" aria-hidden="true"></span>
+                        <span class="text-secondary small fw-bold">System optimization is in progress</span>
+                    </div>
+
+                    <div class="pt-3 border-top d-flex justify-content-center gap-3">
+                        <button onclick="window.location.reload();" class="btn btn-primary rounded-pill px-4 py-2 text-white fw-bold shadow-sm">
+                            <i class="fa fa-sync-alt me-2"></i> Refresh
+                        </button>
+                        <a href="{% url 'admin:index' %}" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-semibold">
+                            Admin Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Maintenance Content End -->
+{% endblock %}

@@ -64,6 +64,44 @@
                             <h4 class="text-muted">No products available at the moment.</h4>
                         </div>
                     {% endfor %}
+
+                    <!-- Pagination Start -->
+                    {% if is_paginated %}
+                    <div class="col-12 mt-5">
+                        <div class="d-flex justify-content-center align-items-center flex-wrap gap-2">
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold">
+                                    &laquo; First
+                                </a>
+                                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold">
+                                    Previous
+                                </a>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <span class="btn btn-primary rounded-pill px-3 py-2 text-white fw-bold shadow-sm">
+                                        {{ num }}
+                                    </span>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <a href="?page={{ num }}" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold">
+                                        {{ num }}
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold">
+                                    Next
+                                </a>
+                                <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold">
+                                    Last &raquo;
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    <!-- Pagination End -->
                 </div>
             </section>
         </div>
