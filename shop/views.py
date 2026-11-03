@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.generic import CreateView, DetailView, ListView, TemplateView
@@ -16,34 +16,89 @@ def get_annotated_categories():
         .filter(num_products__gt=0)
     )
 
+class ProductFilterMixin:
+    paginate_by = 6
 
-class HomeView(ListView):
+    def get_queryset(self):
+        queryset = Product.objects.filter(is_available=True)
+
+        # ძებნა სახელში ან აღწერაში
+        search_query = self.request.GET.get('q', '').strip()
+        if search_query:
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) |
+                Q(description__icontains=search_query)
+            )
+
+        # ფილტრაცია კატეგორიით
+        category_id = self.request.GET.get('category', '').strip()
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
+
+        # ფილტრაცია მინიმალური ფასით
+        min_price = self.request.GET.get('min_price', '').strip()
+        if min_price:
+            try:
+                queryset = queryset.filter(price__gte=float(min_price))
+            except ValueError:
+                pass
+
+        # ფილტრაცია მაქსიმალური ფასით
+        max_price = self.request.GET.get('max_price', '').strip()
+        if max_price:
+            try:
+                queryset = queryset.filter(price__lte=float(max_price))
+            except ValueError:
+                pass
+
+        # ფილტრაცია: მხოლოდ ფასდაკლებული პროდუქტები
+        on_sale = self.request.GET.get('on_sale', '').strip()
+        if on_sale == 'true':
+            queryset = queryset.filter(is_on_sale=True)
+
+        # სორტირება
+        sort_by = self.request.GET.get('sort', '').strip()
+        sort_options = {
+            'price_asc': 'price',
+            'price_desc': '-price',
+            'newest': '-id',
+            'name_asc': 'name',
+            'name_desc': '-name',
+        }
+        order_field = sort_options.get(sort_by, 'price')
+        queryset = queryset.order_by(order_field)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = get_annotated_categories()
+
+        context['current_q'] = self.request.GET.get('q', '').strip()
+        context['current_category'] = self.request.GET.get('category', '').strip()
+        context['current_min_price'] = self.request.GET.get('min_price', '').strip()
+        context['current_max_price'] = self.request.GET.get('max_price', '').strip()
+        context['current_on_sale'] = self.request.GET.get('on_sale', '').strip()
+        context['current_sort'] = self.request.GET.get('sort', '').strip()
+
+        get_params = self.request.GET.copy()
+        if 'page' in get_params:
+            del get_params['page']
+        context['preserved_params'] = get_params.urlencode()
+
+        return context
+
+
+class HomeView(ProductFilterMixin, ListView):
     model = Product
     template_name = 'shop/product_list.html'
     context_object_name = 'products'
-    paginate_by = 6
-
-    def get_queryset(self):
-        return Product.objects.filter(is_available=True).order_by('price')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['categories'] = get_annotated_categories()
-        return context
 
 
-class ShopView(ListView):
+class ShopView(ProductFilterMixin, ListView):
     model = Product
     template_name = 'shop/shop.html'
     context_object_name = 'products'
-    paginate_by = 6
-    def get_queryset(self):
-        return Product.objects.filter(is_available=True).order_by('price')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['categories'] = get_annotated_categories()
-        return context
 
 
 class CategoryProductsView(ListView):
