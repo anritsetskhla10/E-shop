@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
@@ -22,7 +23,7 @@ class ProductFilterMixin:
     def get_queryset(self):
         queryset = Product.objects.filter(is_available=True)
 
-        # ძებნა სახელში ან აღწერაში
+        #  ძებნა სახელში ან აღწერაში
         search_query = self.request.GET.get('q', '').strip()
         if search_query:
             queryset = queryset.filter(
@@ -179,6 +180,7 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
+        messages.success(self.request, f'პროდუქტი "{form.instance.name}" წარმატებით დაემატა.')
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -203,6 +205,7 @@ def product_update_view(request, product_id):
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             form.save()
+            messages.success(request, f'პროდუქტი "{product.name}" წარმატებით განახლდა.')
             return redirect('shop:product_detail', product_id=product.id)
     else:
         form = ProductForm(instance=product)
@@ -225,7 +228,9 @@ def product_delete_view(request, product_id):
         raise PermissionDenied
 
     if request.method == 'POST':
+        product_title = product.name
         product.delete()
+        messages.success(request, f'პროდუქტი "{product_title}" წარმატებით წაიშალა.')
         return redirect('shop:home')
 
     context = {
